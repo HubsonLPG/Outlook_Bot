@@ -1,0 +1,1 @@
+to jest prodżekt do bota do ukloka ale na starcie swojej przygody yesyes
