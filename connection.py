@@ -19,3 +19,12 @@ def outlook_connection():
     inbox = mailbox.Folders["Skrzynka odbiorcza"]
     folder = inbox.Folders["Reset Microsoft"]
     return folder, outlook
+
+def outlook_connection_pomoc():
+
+    outlook = win32com.client.Dispatch("Outlook.Application")
+    namespace = outlook.GetNamespace("MAPI")
+    inbox = namespace.GetDefaultFolder(6)
+    folder = inbox.Folders["Reset Microsoft"]
+
+    return folder, outlook

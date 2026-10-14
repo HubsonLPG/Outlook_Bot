@@ -5,10 +5,10 @@ from datetime import datetime
 import pyodbc
 import pywintypes
 
-from connection import outlook_connection, sql_connection_open
+from connection import outlook_connection, outlook_connection_pomoc, sql_connection_open  # noqa: F401
 
 try:
-    folder, outlook = outlook_connection()
+    folder, outlook = outlook_connection_pomoc()
     print("Połączono z pocztą Outlook")
 except pywintypes.com_error as e:
     print(f"Wystąpił błąd podczas łączenia z pocztą Outlook: {e}")
