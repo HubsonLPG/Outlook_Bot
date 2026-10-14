@@ -1,10 +1,24 @@
+import os
+
 import pyodbc
 import win32com.client
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SERVER = os.getenv('SERVER')
+DATABASE = os.getenv('DATABASE')
+UID = os.getenv('UID')
+PWD = os.getenv('PWD')
 
 
 def sql_connection_open():
     conn = pyodbc.connect(
         "DRIVER={ODBC Driver 18 for SQL Server};"
+        f"SERVER={SERVER};"
+        f"DATABASE={DATABASE};"
+        f"UID={UID};"
+        f"PWD={PWD};"
         "TrustServerCertificate=yes;"
     )
     return conn
