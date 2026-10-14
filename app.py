@@ -1,5 +1,6 @@
 import re
 import time
+from datetime import datetime
 
 import pyodbc
 import pywintypes
@@ -83,13 +84,13 @@ def app(folder, conn):
 
             if row and row.OS_EMAIL2:
 
-                print(f"Przetwarzam: {email}")
+                print(f"Przetwarzam: {email}    Timestamp: {datetime.now()}")
                 send_email(row.OS_EMAIL2, mail_body, True)
                 message.FlagStatus = 1
                 message.UnRead = False
                 message.Save()
 
-                print("Wiadomość obsłużona!")
+                print(f"Wiadomość obsłużona!     Timestamp: {datetime.now()}")
 
             else:
                 print(f"Nie znaleziono adresu dla: {email}")
