@@ -1,25 +1,30 @@
 import re
 import time
-from datetime import datetime
 
 import pyodbc
 import pywintypes
+from rich.console import Console
 
 from connection import outlook_connection, outlook_connection_pomoc, sql_connection_open  # noqa: F401
 
+console = Console(
+    log_time_format="[%Y-%m-%d %H:%M:%S]"
+)
+
 try:
     folder, outlook = outlook_connection_pomoc()
-    print("Połączono z pocztą Outlook")
+    # folder, outlook = outlook_connection()
+    console.log("Połączono z pocztą Outlook")
 except pywintypes.com_error as e:
-    print(f"Wystąpił błąd podczas łączenia z pocztą Outlook: {e}")
+    console.log(f"Wystąpił błąd podczas łączenia z pocztą Outlook: {e}")
     raise
 
 try:
     conn = sql_connection_open()
     cursor = conn.cursor()
-    print("Połączono z bazą SQL")
+    console.log("Połączono z bazą SQL")
 except pyodbc.Error as e:
-    print(f"Wystąpił problem z łączeniem z bazą danych: {e}")
+    console.log(f"Wystąpił problem z łączeniem z bazą danych: {e}")
     raise
 
 mail_body = (
@@ -42,6 +47,7 @@ mail_body = (
 
 
 def send_email(email_address, mail_body, send=False):
+    assert outlook is not None
     mail = outlook.CreateItem(0)
 
     mail.To = str(email_address)
@@ -84,27 +90,40 @@ def app(folder, conn):
 
             if row and row.OS_EMAIL2:
 
-                print(f"Przetwarzam: {email}    Timestamp: {datetime.now()}")
+                console.log(f"Przetwarzam: {email}")
                 send_email(row.OS_EMAIL2, mail_body, True)
                 message.FlagStatus = 1
                 message.UnRead = False
                 message.Save()
 
-                print(f"Wiadomość obsłużona!     Timestamp: {datetime.now()}")
+                console.log("Wiadomość obsłużona!")
 
             else:
-                print(f"Nie znaleziono adresu dla: {email}")
+                console.log(f"Nie znaleziono adresu dla: {email}")
 
         except Exception as e:  # noqa: BLE001
-            print(f"Błąd przy obsłudze {email}: {e}")
+            console.log(f"Błąd przy obsłudze {email}: {e}")
 
 
 while True:
-
     try:
         app(folder, conn)
 
+    except pywintypes.com_error as e:
+        console.log(f"[red]Błąd Outlooka:[/red] {e}")
+        console.log("Próbuję ponownie połączyć się z Outlookiem...")
+
+        try:
+            folder, outlook = outlook_connection_pomoc()
+            console.log("[green]Ponownie połączono z Outlookiem[/green]")
+
+        except pywintypes.com_error as reconnect_error:
+            console.log(
+                f"[red]Nie udało się ponownie połączyć:[/red] "
+                f"{reconnect_error}"
+            )
+
     except Exception as e:  # noqa: BLE001
-        print(f"Błąd sprawdzania skrzynki: {e}")
+        console.log(f"[red]Błąd sprawdzania skrzynki:[/red] {e}")
 
     time.sleep(30)

@@ -3,6 +3,11 @@ import os
 import pyodbc
 import win32com.client
 from dotenv import load_dotenv
+from rich.console import Console
+
+console = Console(
+    log_time_format="[%Y-%m-%d %H:%M:%S]"
+)
 
 load_dotenv()
 
@@ -25,20 +30,69 @@ def sql_connection_open():
 
 
 def outlook_connection():
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    namespace = outlook.GetNamespace("MAPI")
-    recipient = namespace.CreateRecipient("Pomoc IT")
-    recipient.Resolve()
-    mailbox = namespace.Folders["Pomoc IT"]
-    inbox = mailbox.Folders["Skrzynka odbiorcza"]
-    folder = inbox.Folders["Reset Microsoft"]
-    return folder, outlook
+    step = "Uruchamianie Outlooka"
+
+    try:
+        outlook = win32com.client.Dispatch("Outlook.Application")
+
+        step = "Pobieranie przestrzeni MAPI"
+        namespace = outlook.GetNamespace("MAPI")
+
+        step = "Otwieranie skrzynki Pomoc IT"
+        mailbox = namespace.Folders["Pomoc IT"]
+
+        step = "Otwieranie skrzynki odbiorczej"
+        inbox = mailbox.Folders["Skrzynka odbiorcza"]
+
+        step = "Otwieranie folderu Reset Microsoft"
+        folder = inbox.Folders["Reset Microsoft"]
+
+        return folder, outlook
+
+    except Exception as e:  # noqa: BLE001
+        console.log(f"[red]Błąd ({step}): {e}[/red]")
+        return None, None
+
 
 def outlook_connection_pomoc():
+    step = "Uruchamianie Outlooka"
 
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    namespace = outlook.GetNamespace("MAPI")
-    inbox = namespace.GetDefaultFolder(6)
-    folder = inbox.Folders["Reset Microsoft"]
+    try:
+        outlook = win32com.client.Dispatch("Outlook.Application")
 
-    return folder, outlook
+        step = "Pobieranie przestrzeni MAPI"
+        namespace = outlook.GetNamespace("MAPI")
+
+        step = "Otwieranie skrzynki odbiorczej"
+        inbox = namespace.GetDefaultFolder(6)
+
+        step = "Otwieranie folderu Reset Microsoft"
+        folder = inbox.Folders["Reset Microsoft"]
+
+        return folder, outlook
+
+    except Exception as e:  # noqa: BLE001
+        console.log(f"[red]Błąd ({step}): {e}[/red]")
+        return None, None
+
+
+def outlook_connection_inbox():
+    step = "Uruchamianie Outlooka"
+
+    try:
+        outlook = win32com.client.Dispatch("Outlook.Application")
+
+        step = "Pobieranie przestrzeni MAPI"
+        namespace = outlook.GetNamespace("MAPI")
+
+        step = "Otwieranie skrzynki Pomoc IT"
+        mailbox = namespace.Folders["Pomoc IT"]
+
+        step = "Otwieranie skrzynki odbiorczej"
+        folder = mailbox.Folders["Skrzynka odbiorcza"]
+
+        return folder, outlook
+
+    except Exception as e:  # noqa: BLE001
+        console.log(f"[red]Błąd ({step}): {e}[/red]")
+        return None, None
